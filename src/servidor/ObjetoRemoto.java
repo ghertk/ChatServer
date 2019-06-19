@@ -20,7 +20,7 @@ public class ObjetoRemoto implements MensagemInterface {
         UsuarioConectado usuarioConectado = this.usuariosConectados.get(this.usuariosConectados.indexOf(new UsuarioConectado(new Usuario("", ipPessoal), null)));
         Mensagem m = new Mensagem(usuarioConectado.getUsuario(), mensagem);
         this.mensagens.add(m);
-        System.out.println("Mensagem: " + mensagem);
+        System.out.println("Replicando mensagem de: " + m.getUsuario().getNome());
         try {
             this.propagarMensagem(m);
         } catch (NotBoundException ex) {
@@ -34,13 +34,12 @@ public class ObjetoRemoto implements MensagemInterface {
     public List<String> conectarUsuario(String ipCliente, String nome) throws RemoteException {
         Usuario usuario = new Usuario(nome, ipCliente);
         try {
-//            System.out.println(usuario.getIpPessoal());
             UsuarioConectado usuarioConectado = new UsuarioConectado(usuario, (MensagemInterface) Naming.lookup("//" + usuario.getIpPessoal() + ":2001/Chat"));
-            if (this.usuariosConectados.contains(usuario)) {
+            if (this.usuariosConectados.contains(usuarioConectado)) {
                 System.out.println("Usuário já conectado: " + usuario.getIpPessoal());
-            } else {
-                this.usuariosConectados.add(usuarioConectado);
+                this.usuariosConectados.remove(usuarioConectado);
             }
+            this.usuariosConectados.add(usuarioConectado);
         } catch (NotBoundException ex) {
             ex.printStackTrace();
         } catch (MalformedURLException ex) {
